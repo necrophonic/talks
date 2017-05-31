@@ -1,0 +1,157 @@
+#+theme=black
+
+Vendoring in Go
+How, Why, When, Whom?
+
+J. Gregory
+jay@johngregory.me.uk
+http://github.com/necrophonic
+
+* First, a diversion
+
+
+* Dependency management is hard
+
+Almost no software is every built without some kind of external dependency
+
+There are many tools dedicated to the problem
+
+- *Maven* for Java
+- *Bundler* for Ruby
+- *Pip* for Python
+- *Bower* for Javascript, CSS
+- etc ..
+
+Those may be the main go-to tools for each language, but they are far from the only tools. It's a problem that is constantly being re-solved.
+
+
+* Dependency management in Go
+
+For Go, we have the built in package manager
+
+ $ go get
+
+"*get* _downloads_the_packages_named_by_the_import_paths,_along_with_their_dependencies._It_then_installs_the_named_packages,_like_ *go*install* "
+.caption -- [[https://golang.org/cmd/go/#hdr-Download_and_install_packages_and_dependencies][go get docs]]
+
+But that just pulls the most up to date code from the default branch
+
+
+* What if we want a specific version?
+
+* Could use a service like gopkg.in
+
+ http://gopkg.in
+
+A service which provides versioned URLs for redirecting the *go*get* tool onto well defined Github repositories
+
+ $ go get gopkg.in/user/pkg.v3
+
+Which would reference
+
+ $ github.com/user/pkg
+
+On branch/tag *v3*, *v3.N* or *v3.N.M*
+
+ package main
+
+ import github.com/user/pkg.v3
+
+ func main() {
+    ...
+ }
+
+
+* However
+
+There are limitations
+
+- Only works on Github hosted repos
+- Only works if branches/tags are named as expected
+- Makes you rely on another 3rd party to be available and secure
+
+And, as with any third party code:
+
+- There's no guarantee that version v2.0.0 yesterday is v2.0.0 today
+
+Although you _should_ never change a public release there is nothing to stop someone changing something, deleting and then retagging a release
+
+(which is a problem if you require audited code!)
+
+
+* So what to do?
+
+
+* Vendor!
+
+
+* What is vendoring?
+
+Vendoring is defined in Go as:
+
+"_Vendoring_is_the_act_of_making_your_own_copy_of_the_3rd_party_packages_your_project_is_using._Those_copies_are_traditionally_placed_inside_each_project_and_then_saved_in_the_project_repository._"
+
+.caption -- [[https://www.goinggo.net/2013/10/manage-dependencies-with-godep.html]]
+
+By convention, vendored code is placed in the */vendor* folder under you repo root in $GOPATH:
+
+ my-repo/
+ + - main.go
+   - main_test.go
+   - vendor/
+   + - src/github.com/somepackage
+     - src/github.com/someotherpackage
+
+
+* How did we get here?
+
+*Go*1.5*
+
+Vendor support added (off by deafult) and enabled with:
+
+ $ export GO15VENDOREXPERIMENT=1
+
+*Go*1.6*
+
+Vendoring was enabled by default, but could be disabled by using:
+
+ $ export GO15VENDOREXPERIMENT=0
+
+*Go*1.7*
+
+Vendoring now standard and support for *GO15VENDOREXPERIMENT* removed
+
+
+
+
+* Many tools exist
+
+- [[https://github.com/tools/godep][Godep]]
+- [[https://github.com/kardianos/govendor][govendor]]
+- [[https://github.com/Masterminds/glide][Glide]]
+- ... and [[https://github.com/golang/go/wiki/PackageManagementTools][many more]]
+
+
+* The Go way
+
+The plan is that the official tool for vendoring in Go will be `dep`
+
+Currently in _alpha_
+
+ $ dep init
+ $ dep ensure -update
+
+To update a dependency to a specific version
+
+ $ dep ensure github.com/pkg/errors@^0.8.0
+
+ * The dep roadmap
+
+ [[https://github.com/golang/dep/wiki/Roadmap][Roadmap]]
+
+
+* References
+
+- https://blog.gopheracademy.com/advent-2016/saga-go-dependency-management/
+- https://github.com/golang/go/wiki/PackageManagementTools
+- https://github.com/golang/dep/wiki/Roadmap
