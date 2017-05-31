@@ -156,6 +156,10 @@ Vendoring was enabled by default, but could be disabled by using:
 
 Vendoring now standard and support for *GO15VENDOREXPERIMENT* removed
 
+*Go*1.8+*
+
+Yup, it's still there :)
+
 
 # -----------------------------------------------
 
