@@ -1,11 +1,12 @@
 #+theme=black
 
 Vendoring in Go
-How, Why, When, Whom?
+Or, How I stopped worrying and learned to love dependency management
 
 J. Gregory
 jay@johngregory.me.uk
 http://github.com/necrophonic
+@n3crophonic
 
 # -----------------------------------------------
 
@@ -163,14 +164,19 @@ with similar characteristics:
 
 * But the Go toolchain is generally awesome ...
 
-so why do I need a third party tool!?
+
+# -----------------------------------------------
+
+
+* ... so why do I need a third party tool!?
 
 
 # -----------------------------------------------
 
+
 * The Go way
 
-The plan is that the official tool for vendoring in Go will be `dep`
+The plan is that the official tool for vendoring in Go will be *dep*
 
 Currently in _alpha_
 
@@ -213,7 +219,7 @@ _Though_none_of_this_is_guaranteed!_
 # -----------------------------------------------
 
 
-* Caveats
+* Some Caveats
 
 - *Vendor*projects,*not*libaries*
 
@@ -222,9 +228,12 @@ Avoid vendoring in code that will itself likely be vendored inside other code
 - *Do*not*touch*vendor/*
 
 Vendored code must _only_ be updated via your dep tool. Treat it otherwise as
-immutable and do not edit.
+immutable and do not edit
 
+- *Dependencies*must*behave*
 
+As Go does not use a formal package registry (as _perl_ users *CPAN* and _python_ uses *PyPI* for example), *dep* and other tools rely on code branches/releases being
+correctly named and versioned in their respective repositories
 
 # -----------------------------------------------
 
@@ -234,3 +243,4 @@ immutable and do not edit.
 - [[github.com/golang/go/wiki/PackageManagementTools]]
 - [[github.com/golang/dep/wiki/Roadmap]]
 - [[www.goinggo.net/2013/10/manage-dependencies-with-godep.html]]
+
