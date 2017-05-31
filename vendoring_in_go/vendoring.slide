@@ -8,11 +8,15 @@ jay@johngregory.me.uk
 http://github.com/necrophonic
 @n3crophonic
 
+
 # -----------------------------------------------
+
 
 * First, a diversion
 
+
 # -----------------------------------------------
+
 
 * Dependency management is hard
 
@@ -28,7 +32,9 @@ There are many tools dedicated to the problem
 
 Those may be the main go-to tools for each language, but they are far from the only tools. It's a problem that is constantly being re-solved.
 
+
 # -----------------------------------------------
+
 
 * Dependency management in Go
 
@@ -41,11 +47,15 @@ For Go, we have the built in package manager
 
 But that just pulls the most up to date code from the default branch
 
+
 # -----------------------------------------------
+
 
 * What if we want a specific version?
 
+
 # -----------------------------------------------
+
 
 * Could use a service like gopkg.in
 
@@ -69,7 +79,9 @@ On branch/tag *v3*, *v3.N* or *v3.N.M*
     ...
  }
 
+
 # -----------------------------------------------
+
 
 * However
 
@@ -87,15 +99,21 @@ Although you _should_ never change a public release there is nothing to stop som
 
 (which is a problem if you require audited code!)
 
+
 # -----------------------------------------------
+
 
 * So what to do?
 
+
 # -----------------------------------------------
+
 
 * Vendor!
 
+
 # -----------------------------------------------
+
 
 * What is vendoring?
 
@@ -235,7 +253,9 @@ immutable and do not edit
 As Go does not use a formal package registry (as _perl_ users *CPAN* and _python_ uses *PyPI* for example), *dep* and other tools rely on code branches/releases being
 correctly named and versioned in their respective repositories
 
+
 # -----------------------------------------------
+
 
 * Some References
 
