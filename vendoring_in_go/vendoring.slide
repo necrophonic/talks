@@ -106,12 +106,12 @@ Vendoring is defined in Go as:
 
 By convention, vendored code is placed in the */vendor* folder under you repo root in $GOPATH:
 
- my-repo/
- + - main.go
-   - main_test.go
-   - vendor/
-   + - src/github.com/somepackage
-     - src/github.com/someotherpackage
+  .
+  ├── main.go
+  └── vendor
+      ├── github.com
+      ├── ...
+      └── k8s.io
 
 *nb* Most third party tools before this was formalised would generate their own proprietary structure but now support or defautly use */vendor*
 
@@ -153,36 +153,9 @@ Many third party tools exist to support vendoring in Go
 Each take a slightly different approach, but ultimately achieve the same aim
 with similar characteristics:
 
-- Dependency code is copied locally into the project
-- Some kind of manifest is created to manage versions
-
-
-
-# -----------------------------------------------
-
-
-* govendor
-
-  # Setup your project.
-  cd "my project in GOPATH"
-  govendor init
-
-  # Add existing GOPATH files to vendor.
-  govendor add +external
-
-  # View your work.
-  govendor list
-
-  # Look at what is using a package
-  govendor list -v fmt
-
-  # Specify a specific version or revision to fetch
-  govendor fetch golang.org/x/net/context@a4bbce9fcae005b22ae5443f6af064d80a6f5a55
-
-  # Update a package to latest, given any prior version constraint
-  govendor fetch golang.org/x/net/context
-
-.caption More at [[https://github.com/kardianos/govendor]]
+- Discovers *import* dependencies in the current project
+- Copies dependency code locally into the project
+- Creates some kind of manifest to manage vendored code
 
 
 # -----------------------------------------------
@@ -202,34 +175,62 @@ The plan is that the official tool for vendoring in Go will be `dep`
 Currently in _alpha_
 
  $ dep init
- $ dep ensure -update
-
-To update a dependency to a specific version
-
  $ dep ensure github.com/pkg/errors@^0.8.0
+
+Example project
+
+  .
+  ├── Gopkg.lock
+  ├── Gopkg.toml
+  ├── main.go
+  └── vendor
+      ├── github.com
+      ├── golang.org
+      ├── google.golang.org
+      ├── gopkg.in
+      └── k8s.io
+
+
+# -----------------------------------------------
+
 
 * The dep roadmap
 
-[[https://github.com/golang/dep/wiki/Roadmap][Roadmap]]
+The roadmap has three basic phases:
+
+- Get *dep* in shape ready to be merged into the toolchain (ideally at the beginning of a Go development cycle)
+- Once merged, finished essential features and make robust
+- The "future" - changes that can be made once the tool is well established
+
+The goal is to have phase 1 wrapped up be the end of the *1.9* cycle and `dep`
+merged into the toolchain when *1.10* development begins
+
+_Though_none_of_this_is_guaranteed!_
+
+.caption -- Read more at the [[https://github.com/golang/dep/wiki/Roadmap][roadmap wiki]]
 
 
 # -----------------------------------------------
 
 
-* Caveats and words against vendoring
+* Caveats
 
-*Vendor projects, not libaries*
+- *Vendor*projects,*not*libaries*
 
-Although nested dependency resolution may get better (and some tools do it better
-than others), you'll want to avoid vendoring with libraries that may find themselves
-vendored inside a larger project
+Avoid vendoring in code that will itself likely be vendored inside other code
+
+- *Do*not*touch*vendor/*
+
+Vendored code must _only_ be updated via your dep tool. Treat it otherwise as
+immutable and do not edit.
+
 
 
 # -----------------------------------------------
 
-* References
+* Some References
 
-- https://blog.gopheracademy.com/advent-2016/saga-go-dependency-management/
-- https://github.com/golang/go/wiki/PackageManagementTools
-- https://github.com/golang/dep/wiki/Roadmap
-- https://www.goinggo.net/2013/10/manage-dependencies-with-godep.html
+- [[blog.gopheracademy.com/advent-2016/saga-go-dependency-management/]]
+- [[github.com/golang/go/wiki/PackageManagementTools]]
+- [[github.com/golang/dep/wiki/Roadmap]]
+- [[www.goinggo.net/2013/10/manage-dependencies-with-godep.html]]
