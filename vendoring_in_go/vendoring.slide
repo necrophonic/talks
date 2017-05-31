@@ -7,8 +7,11 @@ J. Gregory
 jay@johngregory.me.uk
 http://github.com/necrophonic
 
+# -----------------------------------------------
+
 * First, a diversion
 
+# -----------------------------------------------
 
 * Dependency management is hard
 
@@ -24,6 +27,7 @@ There are many tools dedicated to the problem
 
 Those may be the main go-to tools for each language, but they are far from the only tools. It's a problem that is constantly being re-solved.
 
+# -----------------------------------------------
 
 * Dependency management in Go
 
@@ -36,8 +40,11 @@ For Go, we have the built in package manager
 
 But that just pulls the most up to date code from the default branch
 
+# -----------------------------------------------
 
 * What if we want a specific version?
+
+# -----------------------------------------------
 
 * Could use a service like gopkg.in
 
@@ -61,6 +68,7 @@ On branch/tag *v3*, *v3.N* or *v3.N.M*
     ...
  }
 
+# -----------------------------------------------
 
 * However
 
@@ -78,12 +86,15 @@ Although you _should_ never change a public release there is nothing to stop som
 
 (which is a problem if you require audited code!)
 
+# -----------------------------------------------
 
 * So what to do?
 
+# -----------------------------------------------
 
 * Vendor!
 
+# -----------------------------------------------
 
 * What is vendoring?
 
@@ -101,6 +112,11 @@ By convention, vendored code is placed in the */vendor* folder under you repo ro
    - vendor/
    + - src/github.com/somepackage
      - src/github.com/someotherpackage
+
+*nb* Most third party tools before this was formalised would generate their own proprietary structure but now support or defautly use */vendor*
+
+
+# -----------------------------------------------
 
 
 * How did we get here?
@@ -122,15 +138,62 @@ Vendoring was enabled by default, but could be disabled by using:
 Vendoring now standard and support for *GO15VENDOREXPERIMENT* removed
 
 
+# -----------------------------------------------
 
 
-* Many tools exist
+* There are tools
 
-- [[https://github.com/tools/godep][Godep]]
-- [[https://github.com/kardianos/govendor][govendor]]
-- [[https://github.com/Masterminds/glide][Glide]]
+Many third party tools exist to support vendoring in Go
+
+- [[https://github.com/tools/godep][Godep]] - _4635_github_stars,_413_forks_
+- [[https://github.com/kardianos/govendor][govendor]] - _1990_github_stars,_154_forks_
+- [[https://github.com/Masterminds/glide][Glide]] - _4606_github_stars,_281_forks_
 - ... and [[https://github.com/golang/go/wiki/PackageManagementTools][many more]]
 
+Each take a slightly different approach, but ultimately achieve the same aim
+with similar characteristics:
+
+- Dependency code is copied locally into the project
+- Some kind of manifest is created to manage versions
+
+
+
+# -----------------------------------------------
+
+
+* govendor
+
+  # Setup your project.
+  cd "my project in GOPATH"
+  govendor init
+
+  # Add existing GOPATH files to vendor.
+  govendor add +external
+
+  # View your work.
+  govendor list
+
+  # Look at what is using a package
+  govendor list -v fmt
+
+  # Specify a specific version or revision to fetch
+  govendor fetch golang.org/x/net/context@a4bbce9fcae005b22ae5443f6af064d80a6f5a55
+
+  # Update a package to latest, given any prior version constraint
+  govendor fetch golang.org/x/net/context
+
+.caption More at [[https://github.com/kardianos/govendor]]
+
+
+# -----------------------------------------------
+
+
+* But the Go toolchain is generally awesome ...
+
+so why do I need a third party tool!?
+
+
+# -----------------------------------------------
 
 * The Go way
 
@@ -145,13 +208,28 @@ To update a dependency to a specific version
 
  $ dep ensure github.com/pkg/errors@^0.8.0
 
- * The dep roadmap
+* The dep roadmap
 
- [[https://github.com/golang/dep/wiki/Roadmap][Roadmap]]
+[[https://github.com/golang/dep/wiki/Roadmap][Roadmap]]
 
+
+# -----------------------------------------------
+
+
+* Caveats and words against vendoring
+
+*Vendor projects, not libaries*
+
+Although nested dependency resolution may get better (and some tools do it better
+than others), you'll want to avoid vendoring with libraries that may find themselves
+vendored inside a larger project
+
+
+# -----------------------------------------------
 
 * References
 
 - https://blog.gopheracademy.com/advent-2016/saga-go-dependency-management/
 - https://github.com/golang/go/wiki/PackageManagementTools
 - https://github.com/golang/dep/wiki/Roadmap
+- https://www.goinggo.net/2013/10/manage-dependencies-with-godep.html
