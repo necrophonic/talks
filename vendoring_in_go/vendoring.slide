@@ -1,0 +1,270 @@
+#+theme=black
+
+Vendoring in Go
+Or, How I stopped worrying and learned to love dependency management
+
+J. Gregory
+jay@johngregory.me.uk
+http://github.com/necrophonic
+@n3crophonic
+
+
+# -----------------------------------------------
+
+
+* First, a diversion
+
+
+# -----------------------------------------------
+
+
+* Dependency management is hard
+
+Almost no software is every built without some kind of external dependency
+
+There are many tools dedicated to the problem
+
+- *Maven* for Java
+- *Bundler* for Ruby
+- *Pip* for Python
+- *Bower* for Javascript, CSS
+- etc ..
+
+Those may be the main go-to tools for each language, but they are far from the only tools. It's a problem that is constantly being re-solved.
+
+
+# -----------------------------------------------
+
+
+* Dependency management in Go
+
+For Go, we have the built in package manager
+
+ $ go get
+
+"*get* _downloads_the_packages_named_by_the_import_paths,_along_with_their_dependencies._It_then_installs_the_named_packages,_like_ *go*install* "
+.caption -- [[https://golang.org/cmd/go/#hdr-Download_and_install_packages_and_dependencies][go get docs]]
+
+But that just pulls the most up to date code from the default branch
+
+
+# -----------------------------------------------
+
+
+* What if we want a specific version?
+
+
+# -----------------------------------------------
+
+
+* Could use a service like gopkg.in
+
+ http://gopkg.in
+
+A service which provides versioned URLs for redirecting the *go*get* tool onto well defined Github repositories
+
+ $ go get gopkg.in/user/pkg.v3
+
+Which would reference
+
+ $ github.com/user/pkg
+
+On branch/tag *v3*, *v3.N* or *v3.N.M*
+
+ package main
+
+ import github.com/user/pkg.v3
+
+ func main() {
+    ...
+ }
+
+
+# -----------------------------------------------
+
+
+* However
+
+There are limitations
+
+- Only works on Github hosted repos
+- Only works if branches/tags are named as expected
+- Makes you rely on another 3rd party to be available and secure
+
+And, as with any third party code:
+
+- There's no guarantee that version v2.0.0 yesterday is v2.0.0 today
+
+Although you _should_ never change a public release there is nothing to stop someone changing something, deleting and then retagging a release
+
+(which is a problem if you require audited code!)
+
+
+# -----------------------------------------------
+
+
+* So what to do?
+
+
+# -----------------------------------------------
+
+
+* Vendor!
+
+
+# -----------------------------------------------
+
+
+* What is vendoring?
+
+Vendoring is defined in Go as:
+
+"_Vendoring_is_the_act_of_making_your_own_copy_of_the_3rd_party_packages_your_project_is_using._Those_copies_are_traditionally_placed_inside_each_project_and_then_saved_in_the_project_repository._"
+
+.caption -- [[https://www.goinggo.net/2013/10/manage-dependencies-with-godep.html]]
+
+By convention, vendored code is placed in the */vendor* folder under you repo root in $GOPATH:
+
+  .
+  ├── main.go
+  └── vendor
+      ├── github.com
+      ├── ...
+      └── k8s.io
+
+*nb* Most third party tools before this was formalised would generate their own proprietary structure but now support or defautly use */vendor*
+
+
+# -----------------------------------------------
+
+
+* How did we get here?
+
+*Go*1.5*
+
+Vendor support added (off by deafult) and enabled with:
+
+ $ export GO15VENDOREXPERIMENT=1
+
+*Go*1.6*
+
+Vendoring was enabled by default, but could be disabled by using:
+
+ $ export GO15VENDOREXPERIMENT=0
+
+*Go*1.7*
+
+Vendoring now standard and support for *GO15VENDOREXPERIMENT* removed
+
+*Go*1.8+*
+
+Yup, it's still there :)
+
+
+# -----------------------------------------------
+
+
+* There are tools
+
+Many third party tools exist to support vendoring in Go
+
+- [[https://github.com/tools/godep][Godep]] - _4635_github_stars,_413_forks_
+- [[https://github.com/kardianos/govendor][govendor]] - _1990_github_stars,_154_forks_
+- [[https://github.com/Masterminds/glide][Glide]] - _4606_github_stars,_281_forks_
+- ... and [[https://github.com/golang/go/wiki/PackageManagementTools][many more]]
+
+Each take a slightly different approach, but ultimately achieve the same aim
+with similar characteristics:
+
+- Discovers *import* dependencies in the current project
+- Copies dependency code locally into the project
+- Creates some kind of manifest to manage vendored code
+
+
+# -----------------------------------------------
+
+
+* But the Go toolchain is generally awesome ...
+
+
+# -----------------------------------------------
+
+
+* ... so why do I need a third party tool!?
+
+
+# -----------------------------------------------
+
+
+* The Go way
+
+The plan is that the official tool for vendoring in Go will be *dep*
+
+Currently in _alpha_
+
+ $ dep init
+ $ dep ensure github.com/pkg/errors@^0.8.0
+
+Example project
+
+  .
+  ├── Gopkg.lock
+  ├── Gopkg.toml
+  ├── main.go
+  └── vendor
+      ├── github.com
+      ├── golang.org
+      ├── google.golang.org
+      ├── gopkg.in
+      └── k8s.io
+
+
+# -----------------------------------------------
+
+
+* The dep roadmap
+
+The roadmap has three basic phases:
+
+- Get *dep* in shape ready to be merged into the toolchain (ideally at the beginning of a Go development cycle)
+- Once merged, finished essential features and make robust
+- The "future" - changes that can be made once the tool is well established
+
+The goal is to have phase 1 wrapped up be the end of the *1.9* cycle and `dep`
+merged into the toolchain when *1.10* development begins
+
+_Though_none_of_this_is_guaranteed!_
+
+.caption -- Read more at the [[https://github.com/golang/dep/wiki/Roadmap][roadmap wiki]]
+
+
+# -----------------------------------------------
+
+
+* Some Caveats
+
+- *Vendor*projects,*not*libaries*
+
+Avoid vendoring in code that will itself likely be vendored inside other code
+
+- *Do*not*touch*vendor/*
+
+Vendored code must _only_ be updated via your dep tool. Treat it otherwise as
+immutable and do not edit
+
+- *Dependencies*must*behave*
+
+As Go does not use a formal package registry (as _perl_ users *CPAN* and _python_ uses *PyPI* for example), *dep* and other tools rely on code branches/releases being
+correctly named and versioned in their respective repositories
+
+
+# -----------------------------------------------
+
+
+* Some References
+
+- [[blog.gopheracademy.com/advent-2016/saga-go-dependency-management/]]
+- [[github.com/golang/go/wiki/PackageManagementTools]]
+- [[github.com/golang/dep/wiki/Roadmap]]
+- [[www.goinggo.net/2013/10/manage-dependencies-with-godep.html]]
+
