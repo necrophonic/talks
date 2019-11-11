@@ -1,12 +1,15 @@
 # talks
-A collection of presentations
 
-## Running
+A collection of talks and presentations given at various events
 
-The talks are generated and run using the [go present](https://godoc.org/golang.org/x/tools/present) tool
+## Contents
 
-```shell
-$ git clone https://github.com/necrophonic/talks.git
-$ cd talks/<talk_folder>
-$ present
-```
+- [Zero to Gopher](zero-to-gopher) - A quick introduction to the world of the Go programming language
+- [Vendoring in Go](vendoring-in-go) - A run through of vendoring and Go and the `dep` tool (since replaced by `go modules`)
+
+## How to use
+
+Most talks are published as a pdf and link to original Google slides (along with speaker notes)
+
+However, some are generated using the [go present](https://godoc.org/golang.org/x/tools/present) tool
+
