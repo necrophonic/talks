@@ -30,7 +30,7 @@
   - [25 - FAQ: Should I use Go for everything](#25---faq-should-i-use-go-for-everything)
   - [26 - Cardiff Go](#26---cardiff-go)
   - [27 - Thank you & About me](#27---thank-you--about-me)
-  - [28 Any Questions](#28-any-questions)
+  - [28 - Any Questions](#28---any-questions)
 
 ## 1 - Title page
 
@@ -363,6 +363,6 @@ I’ll be available throughout the day so feel free to come say hi if there’s 
 
 And saying that (NEXT SLIDE)
 
-## 28 Any Questions
+## 28 - Any Questions
 
 > no notes

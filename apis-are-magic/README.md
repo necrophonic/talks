@@ -1,4 +1,4 @@
-# Apis are Magic
+# APIs are Magic
 
 A live coding demo of creating a basic API microservice in Go
 
