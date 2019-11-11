@@ -21,7 +21,7 @@ This will be a quick demo of how easy it is to get started creating api microser
 
 This is my first live-coding demo so bear with me and wish me luck!
 
-The API will create a few endpoints for a simple query and updating of data - and for no particular reason it’s based on characters from My Little Pony, because why not? :) 
+The API will create a few endpoints for a simple query and updating of data - and for no particular reason it’s based on characters from My Little Pony, because why not? :)
 
 ## 3 - Cardiff Go
 
