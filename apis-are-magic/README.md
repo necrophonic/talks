@@ -28,4 +28,4 @@ Code examples published:
 
 List of places and events this talk has been presented
 
-- DevFest Cardiff 2019 [[demo code](https://github.com/necrophonic/pony/cmd/live-demo-devfest2019)]
+- DevFest Cardiff 2019 [[demo code](https://github.com/necrophonic/pony/tree/master/cmd/live-demo-devfest2019)]
