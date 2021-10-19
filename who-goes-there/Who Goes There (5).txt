@@ -1,0 +1,435 @@
+Who GOES THERE?
+Developing a Github user audit
+tool with Go, event driven lambda,
+graphQL and serverless
+1
+Hi and welcome
+
+WHO AM I?
+John Gregory
+Senior Software Engineer at Admiral Financial Services (AFSL), artist, and proud Gopher
+
+2
+My name’s John
+
+Working in software and tech, in public and private sectors, since 2000, 
+
+Using Go personally and professionally since around 2016
+
+Currently working as a senior software engineer for Admiral Financial Services and helping lead the adoption of Go
+
+Outside of work, despite pandemic, I also co-run the Cardiff Go meet up
+
+But without further ado...
+
+So who goes where now?
+How did we get here?
+Key technologies
+Bringing it all together
+3
+
+how did we get here?
+Some background and motivations
+4
+5
+https://en.wikipedia.org/wiki/Office_for_National_Statistics
+
+
+A wide range of revision control
+6
+
+Open source
+https://github.com/onsdigital
+
+
+300+ users
+And growing!
+1.1k Repositories
+That’s quite a few!
+100+ Teams
+With a lot of mobility
+8
+
+
+9
+A github user auditing tool written in Scala.
+
+ONS had few staff with suitable Scala experience to install and maintain as a mission critical tool.
+
+
+
+
+https://github.com/guardian/gu-who
+Inspiration: gu-who
+
+10
+
+
+Design choices
+Whys, whens, and wherefores
+11
+
+
+Key technologies
+Built serverless with aws lambda
+Using lambda for flexibility and cost.
+Deployed with serverless framework
+Simplifying deployment using the serverless framework.
+12
+Query Github using GraphQL API
+Communicating with Github using their GraphQL API for simple querying.
+Event driven using aws sqs queues
+Using sqs as an event queue for scalability and extensibility of the service.
+
+
+
+
+
+
+
+
+Why lambda?
+13
+Cost effective for infrequent runs - only pay for what you use.
+Can be triggered by a timed event.
+No servers to manage.
+Easy routing with destinations.
+AWS Lambda is a compute service that lets you run code without provisioning or managing servers.
+
+Maintenance, provisioning, scaling and logging are all built in.
+
+
+ASide: Lambda destinations
+A destination allows you to specify where to route your response if the lambda succeeds or fails.
+
+For Go we can easily use this to automatically marshal a struct payload.
+14
+
+
+why serverless?
+15
+Replicable builds with infrastructure as code.
+Built for serverless applications such as lambda.
+Cross cloud support..
+Easy to package whole application.
+The Serverless Framework is a free* and open-source framework for deploying serverless code.
+
+Offers from simple deploy to full-lifecycle and monitoring services.
+
+*base offering is free, but additional support tiers and features are paid.
+
+
+
+
+
+Why graphql?
+16
+GraphQL is an API query language, originally created by Facebook.
+
+Schema-based, rather than endpoint based.
+Single API call instead of potentially many with REST.
+
+No over- or under- fetching.
+Built in validation and type checking.
+
+There are disadvantages though - for example graphQL doesn’t support file uploading
+
+ASIDE: Graphql vs rest
+GraphQL
+REST
+Architecture
+client driven
+server driven
+Organisation
+schema & types
+endpoints
+Performance
+fast
+more calls can take more time
+Operations
+Query, Mutation, Subscription
+Create, Read, Update, Delete
+Data Fetching
+specific data in single call
+fixed data in multiple calls
+Stability
+less error prone; automatic validation and type checking
+better choice for complex queries
+17
+Taken from https://www.altexsoft.com/blog/engineering/graphql-core-features-architecture-pros-and-cons/
+
+
+
+
+Why event driven?
+18
+An event driven architecture uses events to trigger and communicate between decoupled services.
+
+They comprise producers, routers and consumers.
+Events can be anything that something may be interested in
+
+Easy decoupling of services.
+Enables extensibility.
+
+
+Bringing it together
+Architecture and code dive
+19
+
+
+High level flow
+20
+Clients receive report
+Clients subscribe to the queue and receive the report. They can then take action such as firing notifications / alerts to a variety of channels.
+Call Github GraphQL API
+The checker lambda is activated by a Cloudwatch scheduled event and calls the Github GraphQL API to create a report.
+
+Publish report to event queue
+The report is published via an on_success lambda action to the event queue
+
+Code DIVE
+21
+https://github.com/necrophonic/who-goes-there
+
+
+
+
+Repository layout
+aws/ - contains the lambda function code and serverless configuration
+
+cmd/ - an example command line runner
+
+pkg/ - standard folder for local packages
+
+resources/ - extra fluff like slackbot avatar images
+22
+
+
+The checker lambda
+/aws/functions/checker/
+23
+First let’s look at the main actor in the service - the checker lambda
+
+This is the lambda that performs the actual queries to the graphQL API based on the CloudWatchEvents trigger.
+
+Checker lambDa
+#1/4 - structure
+
+
+Entry point via main() and invoking the aws sdk function: lambda.Start()
+/aws/functions/checker/checker.go
+24
+
+Checker lambDa
+#2/4 - import environment variables
+Import environment variables such as organisation name and the github access token.
+
+Should ideally use more secure storage such as (on aws) an encrypted ssm value or kms.
+/aws/functions/checker/checker.go
+25
+
+
+Checker lambDa
+#3/4 - perform the query
+Establish a connection to the github graphQL API and fetch all the members.
+
+Run rules on the result and compile the report.
+/aws/functions/checker/checker.go
+26
+Next,
+
+create a client with our access token 
+perform the query
+
+These are from my github package which we’ll look at in a moment
+
+Then we can perform rule execution on the results.
+
+In this case we’re simply recording the total number of users in the organisation and how many of them are not configured to use multifactor authentication.
+We then put those numbers in the report.
+
+
+Checker lambDa
+#4/4 - return the result
+Last thing is to return the report.
+
+The lambda destination will automatically marshal our struct.
+
+Return error as nil to signify success.
+/aws/functions/checker/checker.go
+27
+And just to finish off, once we have our report, we return it.
+
+Aws takes care of marshaling the report struct to a json
+
+The on_success destination that we configured, in this case an sqs queue means the marshaled report gets automatically published to it - no need to manually connect and publish!
+
+As a last thing, as per normal go, we return a nil error to signify that the lambda has successfully executed.
+
+Depending on how it’s configured, you can use error states to trigger retries or other behaviours.
+
+If we had an on_failure destination configured then a non-nil error would cause that route to be invoked, passing our report payload (populated or nil) along with the error to whichever service was configured to receive it for further processing.
+
+The graphql query
+/pkg/github/
+28
+Now we’ve seen the checker lambda’s structure, let’s look at the graphQL query
+
+This is split out into a shared module away from the lambda code
+
+so that the code could easily be shared into say, a Google Cloud Function as none of the code contained here is cloud-specific.
+
+Graphql
+#1/2 - connect
+Using module machinebox/graphql.
+
+Connect to single api endpoint.
+
+Authenticate using an access token header.
+/pkg/github/github.go
+
+29
+For the graphQL calls I’m using Matt Ryer’s machinebox/graphql module.
+
+More complex libraries available with more features
+Simple feature set was all I needed
+
+Only configure a single api endpoint for graphql
+
+We handle authentication via an authentication token
+
+Required token scope is in the README
+
+Graphql
+#2/2 - the query
+Get organisation level details (total users) then pages through all the members.
+
+Can pass variables in when performing the query call.
+/pkg/github/members.go
+
+30
+Quick look at the query
+
+Essentially a fragment of the github graphQL API schema
+
+Some points:
+
+Define variables in the top line (with dollar signs)
+These then used in query body
+Results are paginated so we grab the next 100 members each time.
+
+Nodes and Edges are how graphql paginates data and they’re a bit of a complicated topic - probably the hardest part of graphql!
+
+
+Slack notifier
+/aws/functions/notifier-slack/
+31
+Once we’ve got a report, we need to do something with it.
+
+This could be anything from raising compliance tickets to firing a confetti cannon, but for the first build I went with a straightforward report to slack
+
+For this I created a webhook integration on slack, from which you get a webhook url to connect to.
+
+Structured very similarly to the checker lambda.
+
+Process all events in loop.
+
+Build message using slack blocks.
+notifier
+#1/2 - structure
+/aws/functions/notifier-slack/notifier-slack.go
+
+32
+Notifier lambda very similar to the checker in structure
+
+Same main() etc
+
+Like we had the CloudWatch event, this time we receive an SQS event 
+
+This contains one or more records to process so we range through them.
+
+Using Slack Block API to build the slack message (on next slide) then post it to the slack API
+
+/aws/functions/notifier-slack/notifier-slack.go
+
+33
+The blocks are represented as a set of json objects
+
+Could template, but here I’m using Go’s powerful json marshaling to build
+
+Several block types exist, for example to include pictures etc.
+Here I’m using:
+
+Header - as you’d expect, a heading
+Divider - a visual divider for spacing
+Section - the main standard content block type
+Context - a footer style block
+
+(example on next slide)
+
+Slack example
+Showing the basic report as written by the notifier-slack service
+34
+Finished message looks something like this (depending on your slack theme etc!)
+
+Deploy Demo
+( if time allows! )
+35
+If we have time, we can look at a quick real deploy
+
+If not, catch me after and I’ll be happy to show you the deployment in action!
+
+Thanks!
+You can find me at:
+Twitter: @n3crophonic
+Github: necrophonic
+Instagram: cafpanda
+
+Slides: github.com/necrophonic/talks/who-goes-there
+Code: github.com/necrophonic/who-goes-there
+36
+Thanks for listening!
+
+You can find me on twitter and github - where I’ll be publishing the slides as well as slides from previous talks.
+
+You can also find my totally unrelated artwork over on instagram.
+
+Want to try it for yourself?
+
+Grab it here and have a play. Feel free to fork it or go ahead and build your own!
+
+A quick caveat:
+
+at time of building this would all execute within the aws free tier
+and it still should but I can’t make any guarantees that it will not incur costs (especially if you scale it!)
+
+[end]
+
+Attributions
+Diagrams: draw.io
+Gopher avatars: gopherize.me
+Theme: slidescarnival.com
+Code render: carbon.now.sh
+Stock images: pixabay.com
+
+
+GraphQL: graphql.org/
+Github API: docs.github.com/en/graphql
+Gu-Who: github.com/guardian/gu-who
+ONS Github: github.com/onsdigital
+Serverless framework: serverless.com
+Altexsoft Blog: altexsoft.com/blog
+
+
+
+
+
+REFERENCES
+NOTES:
+
+Icon Purple: #903696
+
+38
+At the time Github could only be set to enforce MFA for every user.
+
+For a few reasons, such as accessibility this wouldn’t work for the ONS at the time.
