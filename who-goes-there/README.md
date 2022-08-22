@@ -24,4 +24,4 @@ None
 
 List of places and events this talk has been presented
 
-- Gophercon UK 2021
+- Gophercon UK 2021 - [Youtube Video](https://youtu.be/tPpW_YKp6Zw?list=PLDWZ5uzn69ex0U5MmbKWorsTuVBgUePxw)
