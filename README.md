@@ -4,6 +4,7 @@ A collection of talks and presentations given at various events
 
 ## Contents
 
+- [7 Deadly Gopher Sins](7-gopher-sins) - The 7 deadly sins for Gophers
 - [All Work and No Play makes Gophers... Something something...](all-work-and-no-play) - Writing a retro inspired 3D adventure game
 - [Go Prymer](prymer-go-for-python) - An introduction to Go for Python engineers
 - [Zero to Gopher](zero-to-gopher) - A quick introduction to the world of the Go programming language

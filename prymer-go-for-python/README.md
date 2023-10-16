@@ -15,7 +15,7 @@ An introduction to Go for Python engineers
 Slides are published:
 
 - as a [pdf snapshot](go-prymer.pdf) with [speaker notes](go-prymer.md)
-- as a working copy [available on Google Slides](https://docs.google.com/presentation/d/1UvT89j_o7nSptNh2uE-ac6dvZAa-oJLzhZJcgGVUjDg/edit?usp=sharing
+- as a working copy [available on Google Slides](https://docs.google.com/presentation/d/1UvT89j_o7nSptNh2uE-ac6dvZAa-oJLzhZJcgGVUjDg/edit?usp=sharing)
 
 ## Supporting resouces
 
